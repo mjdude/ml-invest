@@ -9,6 +9,7 @@ digits = datasets.load_digits()
 # Changed gamma to 0.1 and predictions are off, Gamma as the learning rate (alpha)
 clf = svm.SVC(gamma=0.001, C=100)
 
+# -10 , excluding the last 10 for testing
 x,y = digits.data[:-10], digits.target[:-10]
 clf.fit(x,y)
 

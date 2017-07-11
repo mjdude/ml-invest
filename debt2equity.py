@@ -9,10 +9,10 @@ path = '/Users/mohammedjalil/github/ml-invest/data/intraQuarter'
 def Key_Stats(gather='Total Debt/Equity (mrq)'):
     statspath = path + '/_KeyStats'
     stock_list = [x[0] for x in os.walk(statspath)]
-    df = pd.DataFrame(columns = ['Date', 'Unix', 'Ticker', 'DE Ratio'])
+    df = pd.DataFrame(columns = ['Date', 'Unix', 'Ticker', 'DE Ratio', 'Price', 'SP500'])
     sp500_df = pd.DataFrame.from_csv('data/yahoo-s&p/^GSPC.csv')
 
-    for each_dir in stock_list[1:]:
+    for each_dir in stock_list[1:10]:
         # print('dir is ', each_dir )
         each_file = os.listdir(each_dir)
         ticker = each_dir.split("KeyStats/")[1]
@@ -44,9 +44,14 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                         sp500_value = float(row['Adj Close'])
                     
                     stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
-                    print('stock price: ', stock_price, ' ticker: ', ticker)
+                    # print('stock price: ', stock_price, ' ticker: ', ticker)
 
-                    df = df.append({'Date' : date_stamp, 'Unix': unix_time , 'Ticker' : ticker , 'DE Ratio' :value ,}, ignore_index = True)
+                    df = df.append({'Date' : date_stamp, 
+                                    'Unix': unix_time , 
+                                    'Ticker' : ticker , 
+                                    'DE Ratio' :value ,
+                                    'Price' :stock_price,
+                                    'SP500': sp500_value }, ignore_index = True)
                 except Exception as e:
                     pass
                 

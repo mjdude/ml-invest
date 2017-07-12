@@ -2,7 +2,17 @@
 import pandas as pd
 import os
 import time
+import matplotlib
+import matplotlib.pyplot as plt
+import re
+
 from datetime import datetime
+from time import mktime
+from matplotlib import style
+
+
+style.use('dark_background')
+
 
 path = '/Users/mohammedjalil/github/ml-invest/data/intraQuarter'
 
@@ -16,7 +26,8 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                                  'Price', 
                                  'stock_p_shange', 
                                  'SP500', 
-                                 'sp500_p_change'])
+                                 'sp500_p_change',
+                                 'Difference'])
 
     sp500_df = pd.DataFrame.from_csv('data/yahoo-s&p/^GSPC.csv')
     ticker_list = []
@@ -68,7 +79,8 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                                     'Price' :stock_price,
                                     'stock_p_change': stock_p_change,
                                     'SP500': sp500_value,
-                                    'sp500_p_change': sp500_p_change }, ignore_index = True)
+                                    'sp500_p_change': sp500_p_change ,
+                                    'Difference' : stock_p_change - sp500_p_change}, ignore_index = True)
                 except Exception as e:
                     pass
                 

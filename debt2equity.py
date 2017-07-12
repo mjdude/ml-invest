@@ -13,8 +13,11 @@ from matplotlib import style
 
 style.use('dark_background')
 
-
+# Mac path
 path = '/Users/mohammedjalil/github/ml-invest/data/intraQuarter'
+
+# Linux Path
+# path = '/home/mo/github/ml-invest/data/intraQuarter'
 
 def Key_Stats(gather='Total Debt/Equity (mrq)'):
     statspath = path + '/_KeyStats'

@@ -9,49 +9,66 @@ path = '/Users/mohammedjalil/github/ml-invest/data/intraQuarter'
 def Key_Stats(gather='Total Debt/Equity (mrq)'):
     statspath = path + '/_KeyStats'
     stock_list = [x[0] for x in os.walk(statspath)]
-    df = pd.DataFrame(columns = ['Date', 'Unix', 'Ticker', 'DE Ratio', 'Price', 'SP500'])
-    sp500_df = pd.DataFrame.from_csv('data/yahoo-s&p/^GSPC.csv')
+    df = pd.DataFrame(columns = ['Date', 
+                                 'Unix', 
+                                 'Ticker', 
+                                 'DE Ratio', 
+                                 'Price', 
+                                 'stock_p_shange', 
+                                 'SP500', 
+                                 'sp500_p_change'])
 
-    for each_dir in stock_list[1:10]:
-        # print('dir is ', each_dir )
+    sp500_df = pd.DataFrame.from_csv('data/yahoo-s&p/^GSPC.csv')
+    ticker_list = []
+
+    #every time the stock changes we wont be able to do a percentage difference
+    starting_stock_value = False
+    starting_sp500_value = False
+
+    for each_dir in stock_list[1:20]:
         each_file = os.listdir(each_dir)
         ticker = each_dir.split("KeyStats/")[1]
-        # print('ticker is ', ticker)
+        ticker_list.append(ticker)
         #make sure to skip folders with no files in them
         if len(each_file) > 0:
             for file in each_file:
-                # print('file is ', file)
                 date_stamp = datetime.strptime(file, '%Y%m%d%H%M%S.html')
                 unix_time = time.mktime(date_stamp.timetuple())
                 full_file_path = each_dir + '/' + file
                 source = open(full_file_path, 'r').read()
                 try:
                     value = float(source.split(gather + ':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
-                    # print('value is ', value)
                     try:
                         sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
-                        # print('date is ', sp500_date)
                         row = sp500_df[(sp500_df.index == sp500_date)]
-                        # print('row is :', row)
                         sp500_value = float(row['Adj Close'])
                     except Exception as e:
-                        # print(e)
                         # If on the weekend we go back 3 days (259200) so we get data from the weekday
                         sp500_date = datetime.fromtimestamp(unix_time-259200).strftime('%Y-%m-%d')
-                        # print('date is ', sp500_date)
                         row = sp500_df[(sp500_df.index == sp500_date)]
-                        # print('row is :', row)
                         sp500_value = float(row['Adj Close'])
                     
                     stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
-                    # print('stock price: ', stock_price, ' ticker: ', ticker)
+
+
+
+                    # Here we have enough information to calculate the percentage change
+                    if not starting_stock_value:
+                        starting_stock_value = stock_price
+                    if not starting_sp500_value:
+                        starting_sp500_value = sp500_value
+
+                    stock_p_change = ((stock_price - starting_stock_value) / starting_stock_value) * 100
+                    sp500_p_change = ((sp500_value - starting_sp500_value) / starting_sp500_value) * 100
 
                     df = df.append({'Date' : date_stamp, 
                                     'Unix': unix_time , 
                                     'Ticker' : ticker , 
                                     'DE Ratio' :value ,
                                     'Price' :stock_price,
-                                    'SP500': sp500_value }, ignore_index = True)
+                                    'stock_p_change': stock_p_change,
+                                    'SP500': sp500_value,
+                                    'sp500_p_change': sp500_p_change }, ignore_index = True)
                 except Exception as e:
                     pass
                 

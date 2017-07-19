@@ -68,9 +68,17 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                         row = sp500_df[(sp500_df.index == sp500_date)]
                         sp500_value = float(row['Adj Close'])
                     
+
                     try:
                         stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
                     except Exception as e:
+                        stock_price = (source.split('</small><big><b>')[1].split('</b></big>')[0])
+                        stock_price = re.search(r'(\d{1,8}\.\d{1,8})', stock_price)
+                        stock_price = float(stock_price.group(1))
+                        
+                        print(stock_price)
+                        # time.sleep(15)
+
                         print(str(e), ticker, file)
                         #time.sleep(15)
 

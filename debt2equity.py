@@ -79,7 +79,7 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                         print(stock_price)
                         # time.sleep(15)
 
-                        print(str(e), ticker, file)
+                        # print(str(e), ticker, file)
                         #time.sleep(15)
 
 

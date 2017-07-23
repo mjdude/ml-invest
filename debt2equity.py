@@ -39,7 +39,7 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
     starting_stock_value = False
     starting_sp500_value = False
 
-    for each_dir in stock_list[1:20]:
+    for each_dir in stock_list[1:100]:
         each_file = os.listdir(each_dir)
         ticker = each_dir.split("KeyStats/")[1]
         ticker_list.append(ticker)
@@ -51,7 +51,13 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                 full_file_path = each_dir + '/' + file
                 source = open(full_file_path, 'r').read()
                 try:
-                    value = float(source.split(gather + ':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
+                    #fill in some missing data
+                    try:
+                        value = float(source.split(gather + ':</td><td class="yfnc_tabledata1">')[1].split('</td>')[0])
+                    except Exception as e:
+                        value = float(source.split(gather + ':</td>\n<td class="yfnc_tabledata1">')[1].split('</td>')[0])                        
+                        # print(str(e), ticker, file)
+                        #time.sleep(15)
                     try:
                         sp500_date = datetime.fromtimestamp(unix_time).strftime('%Y-%m-%d')
                         row = sp500_df[(sp500_df.index == sp500_date)]
@@ -62,8 +68,28 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                         row = sp500_df[(sp500_df.index == sp500_date)]
                         sp500_value = float(row['Adj Close'])
                     
-                    stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
 
+                    try:
+                        stock_price = float(source.split('</small><big><b>')[1].split('</b></big>')[0])
+                    except Exception as e:
+
+                        try:
+                            stock_price = (source.split('</small><big><b>')[1].split('</b></big>')[0])
+                            stock_price = re.search(r'(\d{1,8}\.\d{1,8})', stock_price)
+                            stock_price = float(stock_price.group(1))
+                            
+                            print(stock_price)
+                        except Exception as e:                    
+                            stock_price = (source.split('<span class="time_rtq_ticker">')[1].split('</span>')[0])
+                            stock_price = re.search(r'(\d{1,8}\.\d{1,8})', stock_price)
+                            stock_price = float(stock_price.group(1))
+                            
+                            # print('Latest: ', stock_price)
+                            # print(str(e), ticker, file)
+                        # time.sleep(15)
+
+                        # print(str(e), ticker, file)
+                        #time.sleep(15)
 
 
                     # Here we have enough information to calculate the percentage change
@@ -87,9 +113,21 @@ def Key_Stats(gather='Total Debt/Equity (mrq)'):
                 except Exception as e:
                     pass
                 
-                save = gather.replace(' ', '').replace(')', '').replace('(', '').replace('/','')+('.csv')
-                # print(save)
-                df.to_csv(save)
+
+    for each_ticker in ticker_list:
+        try:
+            plot_df = df[(df['Ticker'] == each_ticker)]
+            plot_df = plot_df.set_index(['Date'])
+            plot_df['Difference'].plot(label=each_ticker)
+            plt.legend()
+
+        except:
+            pass
+    
+    plt.show()
+    save = gather.replace(' ', '').replace(')', '').replace('(', '').replace('/','')+('.csv')
+    # print(save)
+    df.to_csv(save)
 
 
 Key_Stats()
